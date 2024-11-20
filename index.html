@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Deeplink</title>
+</head>
+<body>
+    <h1>Generate Deeplink</h1>
+    <form id="deeplinkForm">
+        <label for="receiverBank">Bank Receiver:</label>
+        <select id="receiverBank" name="receiverBank" required>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <br><br>
+
+        <label for="accountNumber">Receiver Account Number:</label>
+        <input type="text" id="accountNumber" name="accountNumber" required>
+        <br><br>
+
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required>
+        <br><br>
+
+        <label for="message">Message:</label>
+        <input type="text" id="message" name="message" required>
+        <br><br>
+
+        <label for="senderBank">Bank Sender:</label>
+        <select id="senderBank" name="senderBank" required>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <br><br>
+
+        <button type="submit">Generate Deeplink</button>
+    </form>
+
+    <script>
+        const bankData = {
+            "banks": [
+                { "bin": "970415", "shortName": "VietinBank" },
+                { "bin": "970436", "shortName": "Vietcombank" },
+                { "bin": "970418", "shortName": "BIDV" },
+                { "bin": "970405", "shortName": "Agribank" },
+                { "bin": "970422", "shortName": "MBBank" },
+                { "bin": "970407", "shortName": "Techcombank" },
+                // Add remaining banks here based on banks.json data
+            ]
+        };
+
+        const receiverBankSelect = document.getElementById('receiverBank');
+        const senderBankSelect = document.getElementById('senderBank');
+
+        // Populate dropdowns
+        bankData.banks.forEach(bank => {
+            const option = new Option(bank.shortName, bank.bin);
+            receiverBankSelect.add(option);
+            senderBankSelect.add(new Option(bank.shortName, bank.bin));
+        });
+
+        document.getElementById('deeplinkForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = {
+                rec_bin: receiverBankSelect.value,
+                rec_acc_num: document.getElementById('accountNumber').value,
+                amount: document.getElementById('amount').value,
+                msg: document.getElementById('message').value,
+                send_bin: senderBankSelect.value
+            };
+
+            try {
+                const response = await fetch('http://0.0.0.0:3000/generate_deeplink', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.error_code === 0 && result.data && result.data.deeplink) {
+                    window.open(result.data.deeplink, '_blank');
+                } else {
+                    alert('Error: ' + (result.error_message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Failed to generate deeplink. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
