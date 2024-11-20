@@ -41,7 +41,7 @@ def bank_list():
         # Extract the list of banks
         bank_list = bank_data.get("data", [])
         
-        return APIResponse.json_format(bank_list)
+        return APIResponse.json_format({'code': 200, 'success': True, 'message': bank_list})
     except Exception as e:
         # Handle and log errors
         error_message = f"Error loading banks list: {str(e)}"

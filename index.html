@@ -36,41 +36,43 @@
     </form>
 
     <script>
-        const bankData = {
-            "banks": [
-                { "bin": "970415", "shortName": "VietinBank" },
-                { "bin": "970436", "shortName": "Vietcombank" },
-                { "bin": "970418", "shortName": "BIDV" },
-                { "bin": "970405", "shortName": "Agribank" },
-                { "bin": "970422", "shortName": "MBBank" },
-                { "bin": "970407", "shortName": "Techcombank" },
-                // Add remaining banks here based on banks.json data
-            ]
-        };
+        async function loadBankData() {
+            try {
+                const response = await fetch('https://bank-deeplink.onrender.com/banks_list'); // Adjust the URL as per your backend setup
+                if (!response.ok) {
+                    throw new Error('Failed to load bank data from backend');
+                }
 
-        const receiverBankSelect = document.getElementById('receiverBank');
-        const senderBankSelect = document.getElementById('senderBank');
+                const bankJson = await response.json();
+                const banks = bankJson.message || [];
+                const receiverBankSelect = document.getElementById('receiverBank');
+                const senderBankSelect = document.getElementById('senderBank');
 
-        // Populate dropdowns
-        bankData.banks.forEach(bank => {
-            const option = new Option(bank.shortName, bank.bin);
-            receiverBankSelect.add(option);
-            senderBankSelect.add(new Option(bank.shortName, bank.bin));
-        });
+                // Populate dropdowns
+                banks.forEach(bank => {
+                    const option = new Option(bank.shortName, bank.bin);
+                    receiverBankSelect.add(option);
+                    senderBankSelect.add(new Option(bank.shortName, bank.bin));
+                });
+            } catch (error) {
+                console.error('Error loading bank data:', error);
+                alert('Failed to load bank data. Please check the backend.');
+            }
+        }
 
         document.getElementById('deeplinkForm').addEventListener('submit', async function(event) {
             event.preventDefault();
 
             const formData = {
-                rec_bin: receiverBankSelect.value,
+                rec_bin: document.getElementById('receiverBank').value,
                 rec_acc_num: document.getElementById('accountNumber').value,
                 amount: document.getElementById('amount').value,
                 msg: document.getElementById('message').value,
-                send_bin: senderBankSelect.value
+                send_bin: document.getElementById('senderBank').value
             };
 
             try {
-                const response = await fetch('http://0.0.0.0:3000/generate_deeplink', {
+                const response = await fetch('https://bank-deeplink.onrender.com/generate_deeplink', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
@@ -86,6 +88,9 @@
                 alert('Failed to generate deeplink. Please try again.');
             }
         });
+
+        // Load bank data on page load
+        loadBankData();
     </script>
 </body>
 </html>
