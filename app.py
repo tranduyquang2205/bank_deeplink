@@ -6,8 +6,18 @@ import traceback
 from api_response import APIResponse
 from api import generate_deep_link
 import json
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust for your security needs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
