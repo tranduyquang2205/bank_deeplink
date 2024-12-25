@@ -35,6 +35,9 @@
         <button type="submit">Generate Deeplink</button>
     </form>
 
+    <!-- Hidden anchor tag -->
+    <a id="hiddenLink" style="display: none;" target="_blank"></a>
+
     <script>
         async function loadBankData() {
             try {
@@ -80,7 +83,12 @@
 
                 const result = await response.json();
                 if (result.error_code === 0 && result.data && result.data.deeplink) {
-                    window.open(result.data.deeplink, '_blank');
+                    const deeplink = result.data.deeplink;
+
+                    // Set href for the hidden link and programmatically click it
+                    const hiddenLink = document.getElementById('hiddenLink');
+                    hiddenLink.href = deeplink;
+                    hiddenLink.click();
                 } else {
                     alert('Error: ' + (result.error_message || 'Unknown error'));
                 }
